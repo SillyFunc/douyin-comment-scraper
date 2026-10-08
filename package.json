@@ -1,11 +1,12 @@
 {
   "name": "douyin-comment-scraper",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "portable:build": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-portable.ps1",
     "preview": "vite preview",
     "tauri": "tauri",
     "phase1:probe": "node scripts/phase1-probe.mjs",

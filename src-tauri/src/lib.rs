@@ -21,6 +21,18 @@ fn report_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
         .join("reports"))
 }
 
+fn bundled_resource_dir(app: &tauri::AppHandle) -> Option<PathBuf> {
+    if let Ok(resources) = app.path().resource_dir() {
+        if resources.join("scripts/phase1-probe.mjs").is_file() {
+            return Some(resources);
+        }
+    }
+    std::env::current_exe()
+        .ok()?
+        .parent()
+        .map(Path::to_path_buf)
+}
+
 fn script_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let development = Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
@@ -30,7 +42,7 @@ fn script_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     if cfg!(debug_assertions) && development.is_file() {
         return Ok(development);
     }
-    if let Ok(resources) = app.path().resource_dir() {
+    if let Some(resources) = bundled_resource_dir(app) {
         let bundled = resources.join("scripts").join("phase1-probe.mjs");
         if bundled.is_file() {
             return Ok(bundled);
@@ -41,6 +53,22 @@ fn script_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     } else {
         Err("找不到评论采集脚本，请检查应用安装文件。".into())
     }
+}
+
+fn collector_command(app: &tauri::AppHandle) -> Command {
+    let resources = bundled_resource_dir(app);
+    let bundled_node = resources.as_ref().map(|dir| dir.join("runtime/node.exe"));
+    let mut command = match bundled_node.filter(|path| path.is_file()) {
+        Some(path) => Command::new(path),
+        None => Command::new("node"),
+    };
+    if let Some(browser_dir) = resources.map(|dir| dir.join("runtime/browsers")) {
+        if browser_dir.is_dir() {
+            command.env("PLAYWRIGHT_BROWSERS_PATH", browser_dir);
+            command.env("DOUYIN_BUNDLED_CHROMIUM", "1");
+        }
+    }
+    command
 }
 
 fn read_result(output_dir: &Path) -> Result<CollectionResult, String> {
@@ -104,12 +132,13 @@ async fn collect_comments(
         return Err("最小出现次数不能低于 2。".into());
     }
     let script = script_path(&app)?;
+    let node = collector_command(&app);
     let output_dir = report_dir(&app)?;
     let staging_dir = output_dir.with_file_name("reports-pending");
     fs::create_dir_all(&staging_dir).map_err(|error| format!("创建临时报告目录失败：{error}"))?;
 
     tauri::async_runtime::spawn_blocking(move || {
-        let mut process = Command::new("node");
+        let mut process = node;
         process
             .arg(script)
             .arg("--stats")
@@ -169,8 +198,9 @@ async fn filter_saved_comments(
         return Err("没有已保存的评论，请先采集视频。".into());
     }
     let script = script_path(&app)?.with_file_name("reprocess-numbers.mjs");
+    let node = collector_command(&app);
     tauri::async_runtime::spawn_blocking(move || {
-        let mut process = Command::new("node");
+        let mut process = node;
         process.arg(script).arg("--output-dir").arg(&output_dir);
         add_filter_args(&mut process, &from_time, &to_time, min_occurrences);
         let output = process
@@ -191,9 +221,10 @@ async fn login_to_douyin(app: tauri::AppHandle, share_text: String) -> Result<()
         return Err("请先粘贴抖音视频的分享文案或链接，再打开扫码窗口。".into());
     }
     let script = script_path(&app)?;
+    let mut node = collector_command(&app);
     let output_dir = report_dir(&app)?;
     tauri::async_runtime::spawn_blocking(move || {
-        let output = Command::new("node")
+        let output = node
             .arg(script)
             .arg("--gui-login")
             .arg("--output-dir")

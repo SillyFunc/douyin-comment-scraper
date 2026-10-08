@@ -10,7 +10,8 @@ import { normalizeNumberFilters } from "./number-stats.mjs";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const localData = process.env.LOCALAPPDATA ?? path.join(os.homedir(), "AppData", "Local");
-const profileDir = path.join(localData, "douyin-comment-scraper", "phase1-chrome-profile");
+const bundledChromium = process.env.DOUYIN_BUNDLED_CHROMIUM === "1";
+const profileDir = path.join(localData, "douyin-comment-scraper", bundledChromium ? "portable-chromium-profile" : "phase1-chrome-profile");
 
 function parseArgs(args) {
   const options = { login: false, guiLogin: false, headless: false, stats: false, scrolls: 3, replies: 0, waitMs: 1800, outputDir: path.join(projectRoot, ".phase1"), from: null, to: null, minOccurrences: 2, text: [] };
@@ -104,7 +105,7 @@ async function main() {
   console.log(`分享链接：${inputUrl}`);
   console.log(`浏览器资料目录：${profileDir}`);
   const context = await chromium.launchPersistentContext(profileDir, {
-    channel: "chrome",
+    channel: bundledChromium ? "chromium" : "chrome",
     headless: options.headless,
     viewport: { width: 1440, height: 900 },
   });

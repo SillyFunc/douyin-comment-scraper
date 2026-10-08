@@ -12,7 +12,7 @@ body { margin: 0; min-width: 320px; }
 button, input, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled, textarea:disabled { cursor: wait; }
-button:focus-visible, input:focus-visible, textarea:focus-visible, .mode-option:focus-within { outline: 3px solid #d9a552; outline-offset: 3px; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #d9a552; outline-offset: 3px; }
 
 .app-shell { min-height: 100vh; }
 .topbar { height: 78px; padding: 0 clamp(20px, 4vw, 68px); display: flex; align-items: center; justify-content: space-between; background: #142f3c; color: #fff; }
@@ -39,16 +39,7 @@ h1 { margin-bottom: 10px; font-size: clamp(27px, 3vw, 42px); line-height: 1.3; l
 .field-label { display: block; margin-bottom: 10px; color: #344b54; font-size: 13px; font-weight: 700; }
 textarea { width: 100%; min-height: 135px; resize: vertical; padding: 13px 14px; background: #f7faf9; border: 1px solid #cfddda; border-radius: 7px; color: #17323d; line-height: 1.65; font-size: 13px; }
 textarea::placeholder { color: #8ca3a5; }
-.field-help { margin: 8px 0 25px; color: #789095; font-size: 12px; line-height: 1.55; }
-.mode-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
-.mode-option { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 12px 11px; border: 1px solid #dce7e5; border-radius: 7px; cursor: pointer; transition: border-color .18s, background .18s; }
-.mode-option.selected { border-color: #2a9090; background: #eef8f6; }
-.mode-option input { flex: none; width: 15px; height: 15px; margin: 0; accent-color: #16827f; }
-.mode-option span { flex: 1; min-width: 0; }
-.mode-option strong, .mode-option small { display: block; }
-.mode-option strong { font-size: 13px; color: #203c46; }
-.mode-option small { margin-top: 3px; color: #71868c; font-size: 11px; line-height: 1.4; }
-.mode-option em { align-self: flex-start; padding: 3px 5px; background: #d8efea; border-radius: 3px; color: #167c79; font-size: 10px; font-style: normal; }
+.field-help { margin: 8px 0 0; color: #789095; font-size: 12px; line-height: 1.55; }
 .filter-fields { display: grid; gap: 8px; margin-top: 22px; padding-top: 20px; border-top: 1px solid #e8eeee; }
 .filter-title { display: flex; align-items: baseline; justify-content: space-between; }
 .filter-title .field-label { margin: 0 0 4px; }
@@ -120,6 +111,6 @@ th:nth-child(2), td:nth-child(2) { width: 62%; }
 .result-note strong { color: #507278; font-weight: 700; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @keyframes pulse { 50% { opacity: .3; } }
-@media (max-width: 980px) { .workspace { grid-template-columns: 1fr; } .control-panel { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; } .panel-heading, .filter-fields, .control-footnote, .collect-button, .apply-button, .run-state, .error-message, .login-button { grid-column: 1 / -1; } .field-help { grid-column: 1; } .mode-fieldset { grid-column: 2; grid-row: 2 / span 3; } }
+@media (max-width: 980px) { .workspace { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .topbar { height: 70px; } .topbar-note, .heading-rule { display: none; } .main-content { padding-top: 28px; } .workspace { gap: 12px; } .control-panel { display: block; padding: 22px; } .result-header, .result-meta, .active-range, .table-tools { padding-left: 20px; padding-right: 20px; } .summary-grid { padding: 20px; grid-template-columns: repeat(2, 1fr); row-gap: 19px; } .summary-grid > div:nth-child(3) { padding-left: 0; border-left: 0; } .leaders { margin-left: 20px; margin-right: 20px; } .leader-items { gap: 4px; } .leader { display: block; } .leader small, .leader span { display: block; } .leader strong { display: block; margin: 2px 0; } .table-tools { align-items: start; flex-direction: column; } th, td { padding-left: 19px; padding-right: 19px; } .result-note { padding-left: 20px; padding-right: 20px; } }
 @media (prefers-reduced-motion: reduce) { .is-busy .state-dot { animation: none; } *, *::before, *::after { transition-duration: 0.01ms !important; } }

@@ -28,7 +28,6 @@ type CaptureReport = {
   capturedReplyIds: number;
 };
 type CollectionResult = { stats: NumberStats; report: CaptureReport; outputDir: string };
-type CollectionMode = "quick" | "full";
 
 function formatTime(value: string) {
   const date = new Date(value);
@@ -45,7 +44,6 @@ function toLocalMinute(value: string | null | undefined) {
 
 function App() {
   const [shareText, setShareText] = useState("");
-  const [mode, setMode] = useState<CollectionMode>("full");
   const [result, setResult] = useState<CollectionResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [loginBusy, setLoginBusy] = useState(false);
@@ -117,7 +115,7 @@ function App() {
     setError("");
     setNotice("");
     try {
-      const next = await invoke<CollectionResult>("collect_comments", { shareText, mode, ...filters });
+      const next = await invoke<CollectionResult>("collect_comments", { shareText, ...filters });
       setResult(next);
       setNotice(`已读取 ${next.stats.commentsSeen} 条评论/回复。`);
     } catch (cause) {
@@ -217,19 +215,6 @@ function App() {
             />
             <p className="field-help">可直接粘贴整段分享文案，工具会提取其中的视频链接。</p>
 
-            <fieldset className="mode-fieldset" disabled={busy}>
-              <legend className="field-label">采集范围</legend>
-              <label className={`mode-option ${mode === "full" ? "selected" : ""}`}>
-                <input type="radio" name="mode" value="full" checked={mode === "full"} onChange={() => setMode("full")} />
-                <span><strong>尽量读取完整顶层评论</strong><small>滚动到网页提示没有更多，耗时较长</small></span>
-                <em>推荐</em>
-              </label>
-              <label className={`mode-option ${mode === "quick" ? "selected" : ""}`}>
-                <input type="radio" name="mode" value="quick" checked={mode === "quick"} onChange={() => setMode("quick")} />
-                <span><strong>快速查看</strong><small>只滚动前 10 次，适合验证链接</small></span>
-              </label>
-            </fieldset>
-
             <div className="filter-fields">
               <div className="filter-title"><span className="field-label">条件筛选</span><small>按评论发布时间</small></div>
               <label htmlFor="time-from">开始时间</label>
@@ -250,7 +235,7 @@ function App() {
             </div>
             {error && <div className="error-message" role="alert">{error}</div>}
             <button className="login-button" type="button" onClick={login} disabled={busy}>登录失效？打开扫码窗口</button>
-            <div className="control-footnote">统计仅包含网页实际加载的评论。调整筛选条件后可直接重新统计本机已保存的评论。</div>
+            <div className="control-footnote">默认滚动到网页提示顶层评论没有更多。统计仅包含实际加载的评论；调整筛选条件后可直接重新统计本机已保存的评论。</div>
           </section>
 
           <section className="result-panel" aria-labelledby="result-title">

@@ -90,7 +90,6 @@ fn load_last_result(app: tauri::AppHandle) -> Result<Option<CollectionResult>, S
 async fn collect_comments(
     app: tauri::AppHandle,
     share_text: String,
-    mode: String,
     from_time: Option<String>,
     to_time: Option<String>,
     min_occurrences: u32,
@@ -100,9 +99,6 @@ async fn collect_comments(
     }
     if share_text.len() > 10_000 {
         return Err("分享文案过长，请只粘贴一个视频的分享内容。".into());
-    }
-    if mode != "quick" && mode != "full" {
-        return Err("采集范围无效。".into());
     }
     if min_occurrences < 2 {
         return Err("最小出现次数不能低于 2。".into());
@@ -118,13 +114,9 @@ async fn collect_comments(
             .arg(script)
             .arg("--stats")
             .arg("--headless")
+            .arg("--until-end")
             .arg("--output-dir")
             .arg(&staging_dir);
-        if mode == "full" {
-            process.arg("--until-end");
-        } else {
-            process.arg("--scrolls").arg("10");
-        }
         add_filter_args(&mut process, &from_time, &to_time, min_occurrences);
         let output = process
             .arg(share_text)
